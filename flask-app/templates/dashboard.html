@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Forest Fire</title>
+        <meta name="viewport" content="width=device-width">
+        <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+        <style>
+            .wrapper {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            margin: 50px auto 0 auto;
+            padding-bottom: 30px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            clear: both;
+            }
+            .box {
+            float: left;
+            width: 50%;
+            height: 50%;
+            box-sizing: border-box;
+            }
+            .container {
+            width: 450px;
+            margin: 0 auto;
+            text-align: center;
+            }
+            .gauge {
+            width: 320px;
+            height: 240px;
+            }
+            
+            .space {
+            margin-bottom: 100px;
+            }
+            button {
+            margin: 30px 5px 0 2px;
+            padding: 16px 40px;
+            border-radius: 5px;
+            font-size: 18px;
+            border: none;
+            background: #34aadc;
+            color: white;
+            cursor: pointer;
+            }
+        </style>
+        <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+        
+    </head>
+    <body>
+        <center>
+            <h1>Dashboard</h1>
+            <h4><a href="/getdata">Filter Page</a></h4>
+        </center>
+        <div class="wrapper space">
+            <div class="box">
+                <div id="g1" class="gauge"></div>
+                <center>Temperature (F)</center>
+            </div>
+            <div class="box">
+                <div id="g2" class="gauge"></div>
+                <center>Humidity (%)</center>
+            </div>
+            <div class="box">
+                <div id="g3" class="gauge"></div>
+                <center>CO2 (ppm)</center>
+            </div>
+            <div class="box">
+                <div id="g4" class="gauge"></div>
+                <center>Light (lumen)</center>
+            </div>
+        </div>
+        <div class="container">
+        </div>
+        <center>
+        <h4>Data from Last Passed Minute</h4>
+        </center>
+<table class="table">
+  <thead class="thead-inverse">
+    <tr>
+      <th>Data Type</th>
+      <th>Min</th>
+      <th>Mean</th>
+      <th>Max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">CO2 (ppm)</th>
+      <td id="co2Min">0</td>
+      <td id="co2Mean">0</td>
+      <td id="co2Max">0</td>
+    </tr>
+    <tr>
+      <th scope="row">Temperature (F)</th>
+      <td id="tempMin">0</td>
+      <td id="tempMean">0</td>
+      <td id="tempMax">0</td>
+    </tr>
+    <tr>
+      <th scope="row">Light (lumen)</th>
+      <td id="lightMin">0</td>
+      <td id="lightMean">0</td>
+      <td id="lightMax">0</td>
+    </tr>
+    <tr>
+      <th scope="row">Humidity (%)</th>
+      <td id="humMin">0</td>
+      <td id="humMean">0</td>
+      <td id="humMax">0</td>
+    </tr>
+  </tbody>
+</table>
+        <script src="{{ url_for('static', filename='raphael-2.1.4.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='justgage.js') }}"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function(event) {
+            
+              var g1 = new JustGage({
+                id: 'g1',
+                value: 0,
+                min: 0,
+                max: 100,
+                pointer: true,
+                pointerOptions: {
+                  toplength: -15,
+                  bottomlength: 10,
+                  bottomwidth: 12,
+                  color: '#8e8e93',
+                  stroke: '#ffffff',
+                  stroke_width: 3,
+                  stroke_linecap: 'round'
+                },
+                gaugeWidthScale: 0.6,
+                counter: true
+              });
+            
+              var g2 = new JustGage({
+                id: 'g2',
+                value: 0,
+                min: 0,
+                max: 100,
+                pointer: true,
+                pointerOptions: {
+                  toplength: -15,
+                  bottomlength: 10,
+                  bottomwidth: 12,
+                  color: '#8e8e93',
+                  stroke: '#ffffff',
+                  stroke_width: 3,
+                  stroke_linecap: 'round'
+                },
+                gaugeWidthScale: 0.6,
+                counter: true
+              });
+            
+              var g3 = new JustGage({
+                id: 'g3',
+                value: 0,
+                min: 0,
+                max: 500,
+                pointer: true,
+                pointerOptions: {
+                  toplength: -15,
+                  bottomlength: 10,
+                  bottomwidth: 12,
+                  color: '#8e8e93',
+                  stroke: '#ffffff',
+                  stroke_width: 3,
+                  stroke_linecap: 'round'
+                },
+                gaugeWidthScale: 0.6,
+                counter: true
+              });
+            
+              var g4 = new JustGage({
+                id: 'g4',
+                value: 0,
+                min: 0,
+                max: 10000,
+                pointer: true,
+                pointerOptions: {
+                  toplength: -15,
+                  bottomlength: 10,
+                  bottomwidth: 12,
+                  color: '#8e8e93',
+                  stroke: '#ffffff',
+                  stroke_width: 3,
+                  stroke_linecap: 'round'
+                },
+                gaugeWidthScale: 0.6,
+                counter: true
+              });
+            
+            
+            setInterval(                                
+            function()
+            {
+            $.getJSON('/data', {}, function(data) {
+               //data=JSON.parse(data);
+               console.log(data);
+               g1.refresh(data.temperature);
+               g2.refresh(data.humidity); 
+               g3.refresh(data.co2); 
+               g4.refresh(data.light); 
+              });
+              },
+            1000); 
+            setInterval(
+            function()
+            {
+            $.getJSON('/updateData', {}, function(data) {
+               //data=JSON.parse(data);
+               console.log(data);
+               document.getElementById("co2Min").innerHTML = data.co2Min;
+               document.getElementById("co2Mean").innerHTML = data.co2Mean;
+               document.getElementById("co2Max").innerHTML = data.co2Max;
+
+               document.getElementById("tempMin").innerHTML = data.tempMin;
+               document.getElementById("tempMean").innerHTML = data.tempMean;
+               document.getElementById("tempMax").innerHTML = data.tempMax;
+
+               document.getElementById("lightMin").innerHTML = data.lightMin;
+               document.getElementById("lightMean").innerHTML = data.lightMean;
+               document.getElementById("lightMax").innerHTML = data.lightMax;
+
+               document.getElementById("humMin").innerHTML = data.humMin;
+               document.getElementById("humMean").innerHTML = data.humMean;
+               document.getElementById("humMax").innerHTML = data.humMax;              
+              });
+              },
+            2000); //supposed to be 60k but doesn't update fast enough on web apge       
+            });
+            
+     
+        </script>
+        
+
+
+    </body>
+</html>
